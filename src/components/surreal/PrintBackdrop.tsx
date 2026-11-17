@@ -4,12 +4,18 @@ import type { ReaderScenery } from "../../data/publications";
 
 // A slanted, feathered boundary moves through the registered high-water print.
 const bankPosition = (level: number) => 109 - level * 139;
+const shoreHeight = (level: number) => 96 - level * 48;
+
 
 function tideMask(level: number) {
   const bank = bankPosition(level);
   const advancingEdge = `linear-gradient(105deg, transparent ${bank - 27}%, black ${bank + 6}%)`;
   const floodedChannels = `linear-gradient(180deg, transparent 33%, rgba(0, 0, 0, ${level * .78}) 52% 78%, transparent 100%)`;
-  return advancingEdge + ", " + floodedChannels;
+  // The near shore floods upward as well as sideways. This reads in the
+  // exposed bottom margin when a single page covers most of the panorama.
+  const shore = shoreHeight(level);
+  const nearWater = `linear-gradient(180deg, transparent ${shore - 4}%, #000a ${shore + 3}%, #000 ${shore + 13}%)`;
+  return [advancingEdge, floodedChannels, nearWater].join(", ");
 }
 
 function bankMask(level: number) {
@@ -33,16 +39,38 @@ export default function PrintBackdrop({ scenery, index, turning, reduced }: {
   const opacity = useTransform(tide, tideOpacity);
   const advancingBank = useTransform(tide, bankMask);
   const velocity = useVelocity(tide);
-  const wake = useTransform(velocity, speed => Math.min(0.72, Math.abs(speed) * 0.66));
+  const wake = useTransform(velocity, speed => Math.min(.64, Math.abs(speed) * .6));
+  const shore = useMotionValue(shoreHeight(level));
+  const roll = useTransform(shore, height => `${height}%`);
+  const crest = useTransform(velocity, speed => Math.min(.9, Math.abs(speed) * 1.75));
 
   useEffect(() => {
     if (reduced) {
       tide.jump(level);
+      shore.jump(shoreHeight(level));
       return;
     }
-    const incoming = animate(tide, level, { duration: 1.7, ease: [.18, .36, .22, 1] });
-    return () => incoming.stop();
-  }, [level, reduced, tide]);
+    const startingLevel = tide.get();
+    if (Math.abs(level - startingLevel) < .001) {
+      tide.jump(level);
+      return;
+    }
+    const rising = level > startingLevel;
+    const water = animate(tide, level, { duration: 1.55, ease: [.18, .36, .22, 1] });
+
+    // A fresh crest starts below the book, where the wash is visible on a phone
+    // before it reaches the narrower side margins. Turning back reverses the path.
+    const outerWater = 98;
+    shore.jump(rising ? outerWater : shoreHeight(startingLevel));
+    const wave = animate(shore, rising ? shoreHeight(level) : outerWater, {
+      duration: 1.45,
+      ease: [.43, .04, .27, 1],
+    });
+    return () => {
+      water.stop();
+      wave.stop();
+    };
+  }, [level, reduced, shore, tide]);
 
   return (
     <div className="dreamscape sr-print-backdrop" aria-hidden="true" data-paused={turning} data-tide={level}>
@@ -71,6 +99,15 @@ export default function PrintBackdrop({ scenery, index, turning, reduced }: {
           )}
         </motion.div>
       </div>
+      {!reduced && (
+        <motion.div className="sr-print-rolling-shore" style={{ y: roll, opacity: crest }}>
+          <svg viewBox="0 0 720 56" preserveAspectRatio="none" fill="none">
+            <path className="sr-print-crest" d="M-14 19C54 19 119 31 192 27s127-13 184-12 123 11 179 9 105-13 183-12" />
+            <path className="sr-print-foam" d="M-12 20c33-1 58 1 85 5m79 5c37 2 79-3 112-7m90-5c54-1 92 3 131 7m56 1c63-2 113-10 192-11" />
+            <path className="sr-print-afterwash" d="M-12 33c40 0 87 9 123 9m81 2c63-2 102-10 155-11m90 2c52 5 91 8 137 3m42-6c42-7 75-7 119-8" />
+          </svg>
+        </motion.div>
+      )}
     </div>
   );
 }
