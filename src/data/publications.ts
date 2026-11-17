@@ -53,6 +53,15 @@ export interface SongPiece extends PieceBase {
 
 export type Piece = PoemPiece | FilmPiece | ArtPiece | SongPiece;
 
+export interface ReaderScenery {
+  lowTide: string;
+  highTide: string;
+  /** Water levels in reading order, starting at the cover. */
+  tideLevels: readonly number[];
+  /** Full-bleed illustrations keyed by piece ID. */
+  plates: Readonly<Record<string, string>>;
+}
+
 export interface Publication {
   id: string;
   caption: string;
@@ -60,6 +69,9 @@ export interface Publication {
   issueNumber?: string;
   coverSrc?: string;
   coverAlt?: string;
+  readerScenery?: ReaderScenery;
+  /** Single route used by a local preview instead of its own published pages. */
+  previewPath?: string;
   glow: GlowColor;
   pieces: Piece[];
   /** Kept in the codebase but left off the site until it is ready. */

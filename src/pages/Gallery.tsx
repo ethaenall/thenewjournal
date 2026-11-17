@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { verseLine } from "../lib/verse";
 import { Link } from "react-router-dom";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useJournal } from "../lib/useJournal";
 import { matchesPublished } from "../data/publishedIssues";
 import { PREVIEW_ID } from "../lib/preview";
 import { issueName } from "../lib/issueLabel";
 import type { Piece, Publication } from "../data/publications";
+import Cassette from "../components/Cassette";
+import { wallPreview } from "../lib/wallPreview";
+import { medium, readerPath } from "../lib/publicPages";
 import ShareButton from "../components/pieces/ShareButton";
 import { rememberReadingPosition } from "../lib/readingPosition";
 import "../components/gallerywall/gallerywall.css";
@@ -16,60 +19,41 @@ interface Work {
   publication: Publication;
 }
 
-// A few opening lines for the wall. Song lyrics run long, so fewer of them.
-function snippet(piece: Piece) {
-  const lines =
-    piece.type === "poem" ? piece.lines : piece.type === "song" ? piece.transcript : [];
-  return lines.filter((line) => line.trim()).slice(0, piece.type === "song" ? 2 : 4);
-}
-
 function WorkCard({ work, onOpen }: { work: Work; onOpen: (element: HTMLElement) => void }) {
   const { piece, publication } = work;
-  const label = piece.type === "poem" ? "Writing" : piece.type[0].toUpperCase() + piece.type.slice(1);
   return (
     <li className={`gw-item gw-${piece.type}`}>
-      <button
-        type="button"
+      <Link
+        to={readerPath(publication, piece)}
         className="gw-card"
-        onClick={(event) => onOpen(event.currentTarget)}
-        aria-label={`Open ${piece.title} by ${piece.author}, ${label}`}
+        onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.button !== 0) return;
+          event.preventDefault();
+          onOpen(event.currentTarget);
+        }}
+        aria-label={`Open ${piece.title} by ${piece.author}, ${medium[piece.type]}`}
       >
-        {piece.type === "art" && (
-          <span className="gw-frame">
-            {piece.imageSrc ? (
-              <img src={piece.imageSrc} alt="" loading="lazy" />
-            ) : (
-              <span className="gw-blank">{piece.title}</span>
-            )}
-          </span>
-        )}
-        {piece.type === "poem" && (
-          <span className="gw-sheet">
-            {snippet(piece).map((line, index) => (
-              <span key={index}>{line}</span>
-            ))}
-          </span>
-        )}
-        {piece.type === "film" && (
-          <span className="gw-screen">
-            <span className="gw-play" aria-hidden="true" />
-          </span>
-        )}
-        {piece.type === "song" && (
-          <span className="gw-tape">
-            {snippet(piece).map((line, index) => (
-              <span key={index}>{line}</span>
-            ))}
-          </span>
-        )}
+        <span className={`gw-mount gw-mount-${piece.type}`} aria-hidden="true">
+          {piece.type === "art" && piece.imageSrc && (
+            <span className="gw-frame"><img src={wallPreview(piece.imageSrc) ?? piece.imageSrc} alt="" decoding="async" /></span>
+          )}
+          {piece.type === "poem" && (
+            <span className="gw-sheet">{piece.lines.filter(line => line.trim()).slice(0, 4).map((line, index) => <span key={index}>{line}</span>)}</span>
+          )}
+          {piece.type === "film" && (
+            <span className="gw-screen">
+              {wallPreview(piece.videoSrc) && <img src={wallPreview(piece.videoSrc)} alt="" decoding="async" />}
+              <span className="gw-play" />
+            </span>
+          )}
+          {piece.type === "song" && <Cassette className="gw-cassette" label={piece.title.length < 23 ? piece.title : "Side A"} />}
+        </span>
         <span className="gw-plate">
+          <small>{medium[piece.type]}</small>
           <strong>{piece.title}</strong>
           <span>{piece.author}</span>
-          <small>
-            {label}, {publication.caption}
-          </small>
         </span>
-      </button>
+      </Link>
     </li>
   );
 }
@@ -198,7 +182,6 @@ function WorkDialog({
       aria-label={piece.title}
       initial={{ opacity: reduced ? 1 : 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
       transition={{ duration: reduced ? 0 : 0.2 }}
       onCancel={(event) => {
         event.preventDefault();
@@ -221,7 +204,7 @@ function WorkDialog({
         <Look key={piece.id} piece={piece} />
         <Link
           className="gw-source"
-          to={`/publication/${publication.id}?piece=${encodeURIComponent(piece.id)}`}
+          to={readerPath(publication, piece)}
         >
           {sourceVerb[piece.type]} it in {publication.caption}, {issueName(publication)}
         </Link>
@@ -246,14 +229,16 @@ export default function Gallery() {
   const [open, setOpen] = useState<number | null>(null);
   const opener = useRef<HTMLElement | null>(null);
 
-  const all = useMemo<Work[]>(
-    () =>
-      journal.publications
-        .filter((p) => p.id !== PREVIEW_ID || !journal.draft || !matchesPublished(journal.draft))
-        .flatMap((publication) => publication.pieces.map((piece) => ({ piece, publication }))),
+  const publications = useMemo(
+    () => journal.publications.filter(publication => publication.pieces.length &&
+      (publication.id !== PREVIEW_ID || !journal.draft || !matchesPublished(journal.draft))),
     [journal.publications, journal.draft],
   );
-  const works = all;
+  const works = useMemo<Work[]>(
+    () => publications.flatMap(publication => publication.pieces.map(piece => ({ piece, publication }))),
+    [publications],
+  );
+  const indices = useMemo(() => new Map(works.map((work, index) => [work.piece, index])), [works]);
 
   function step(offset: -1 | 1) {
     setOpen((current) =>
@@ -273,30 +258,31 @@ export default function Gallery() {
         transition={{ duration: reduced ? 0 : 0.4 }}
       >
         <h1>Gallery</h1>
+        <span>{works.length} {works.length === 1 ? "work" : "works"}</span>
       </motion.header>
-      {all.length === 0 ? (
+      {works.length === 0 ? (
         <p className="gw-empty">The first works are on their way.</p>
       ) : (
-        <>
-          <ul className="gw-wallgrid">
-            {works.map((work, index) => (
-              <WorkCard
-                key={`${work.publication.id}:${work.piece.id}`}
-                work={work}
-                onOpen={(element) => {
+        publications.map(publication => (
+          <section className="gw-exhibition" key={publication.id} aria-label={publication.caption}>
+            <header className="gw-exhibition-head">
+              <h2>{publication.caption} <small>{issueName(publication)}</small></h2>
+              <Link className="gw-walk" to={readerPath(publication) + "?view=gallery"}>Walk through the exhibition <span aria-hidden="true">→</span></Link>
+            </header>
+            <ul className="gw-wallgrid">
+              {publication.pieces.map(piece => (
+                <WorkCard key={piece.id} work={{ publication, piece }} onOpen={element => {
                   opener.current = element;
-                  setOpen(index);
-                }}
-              />
-            ))}
-          </ul>
-        </>
+                  setOpen(indices.get(piece) ?? null);
+                }} />
+              ))}
+            </ul>
+          </section>
+        ))
       )}
-      <AnimatePresence>
-        {open !== null && works[open] && (
-          <WorkDialog key="dialog" works={works} index={open} onClose={close} onStep={step} />
-        )}
-      </AnimatePresence>
+      {open !== null && works[open] && (
+        <WorkDialog works={works} index={open} onClose={close} onStep={step} />
+      )}
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import { bookStudyEnabled, studyPath } from "./estuary/preview";
 import { useEffect, useId, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -87,7 +88,7 @@ export default function NavBar() {
     };
   }, [menuOpen]);
   // Issues are immersive: each reader brings its own minimal chrome.
-  if (pathname.startsWith("/publication/")) return null;
+  if (pathname.startsWith("/publication/") || (bookStudyEnabled && pathname.replace(/\/?$/, "/") === studyPath)) return null;
   return (
     <header
       ref={header}

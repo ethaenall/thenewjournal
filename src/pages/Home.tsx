@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { useJournal } from "../lib/useJournal";
+import { studyPublication } from "../components/estuary/preview";
 import CoverTable from "../components/table/CoverTable";
 import { matchesPublished } from "../data/publishedIssues";
 import { PREVIEW_ID } from "../lib/preview";
+import { medium, mission, readerPath } from "../lib/publicPages";
 import ContinueReading from "../components/ContinueReading";
 
 export default function Home() {
@@ -13,6 +15,7 @@ export default function Home() {
   const publications = journal.publications.filter(
     (p) => p.id !== PREVIEW_ID || !journal.draft || !matchesPublished(journal.draft),
   );
+  if (studyPublication && publications.length) publications.push(studyPublication);
   // Gallery-edition issues live in the Gallery, as individual works; the table holds magazines.
   const magazines = publications.filter((p) => p.theme !== "museum");
   return (
@@ -24,9 +27,23 @@ export default function Home() {
         transition={{ duration: reduced ? 0 : 0.4 }}
       >
         <h1>The <i>New</i> Journal<span aria-hidden="true">.</span></h1>
+        <p className="journal-mission">{mission}</p>
       </motion.header>
       <ContinueReading publications={publications} />
       <CoverTable publications={magazines} />
+      {publications.length > 0 && (
+        <section className="home-contents" aria-label="Issue contents">
+          {publications.map(publication => (
+            <details key={publication.id}>
+              <summary>Inside {publication.caption}<span aria-hidden="true" className="contents-fold" /></summary>
+              <ol>{publication.pieces.map(piece => (
+                <li key={piece.id}><Link to={readerPath(publication, piece)}><span>{piece.title}</span><small>{medium[piece.type]}</small></Link></li>
+              ))}</ol>
+            </details>
+          ))}
+          <Link className="home-gallery-link" to="/gallery/">Visit the gallery <span aria-hidden="true">→</span></Link>
+        </section>
+      )}
       {import.meta.env.DEV && <motion.section className="journal-desk" aria-labelledby="try-heading" initial={{ opacity: reduced ? 1 : 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
         <div className="desk-paper" aria-hidden="true"><span>The New Journal / Your issue</span><i>It starts<br />with a page.</i><div className="desk-lines"><b /><b /><b /><b /></div><span>01</span></div>
         <div className="desk-copy">

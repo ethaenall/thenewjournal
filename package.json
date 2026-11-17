@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/build-pages.mjs",
+    "build:book-study": "tsc -b && vite build --mode book-study && node scripts/build-pages.mjs --book-study",
     "lint": "oxlint",
     "preview": "vite preview",
     "check:preview": "node scripts/check-preview.mjs"

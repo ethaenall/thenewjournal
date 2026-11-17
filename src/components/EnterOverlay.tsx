@@ -7,6 +7,7 @@ import {
   markGrown,
   useEnterState,
 } from "../lib/enterTransition";
+import { studyPublication } from "./estuary/preview";
 import { useJournal } from "../lib/useJournal";
 
 const EASE = [0.76, 0, 0.24, 1] as const;
@@ -23,7 +24,12 @@ export default function EnterOverlay() {
   useLayoutEffect(() => {
     const from = previous.current;
     previous.current = pathname;
-    if (reduced || pathname !== "/" || !from.startsWith("/publication/")) return;
+    if (reduced || pathname !== "/") return;
+    if (studyPublication && from.replace(/\/?$/, "/") === studyPublication.previewPath) {
+      startReturn(studyPublication.id, studyPublication.theme ?? "surreal");
+      return;
+    }
+    if (!from.startsWith("/publication/")) return;
     const id = decodeURIComponent(from.split("/")[2] ?? "");
     const publication = publications.find((p) => p.id === id);
     if (publication) startReturn(id, publication.theme ?? "surreal");

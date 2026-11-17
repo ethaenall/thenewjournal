@@ -26,10 +26,11 @@ function cloudflareAnalytics(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  build: { cssCodeSplit: mode !== "book-study" },
   // The site lives at the root of thenewjournal.org. Set PAGES_BASE (e.g. /thenewjournal/)
   // only to build for a sub-path, such as a GitHub Pages project URL without a custom domain.
   base: process.env.PAGES_BASE ?? '/',
   // publishPlugin applies only to `npm run dev`: builds never contain the publish endpoints.
   plugins: [react(), tailwindcss(), publishPlugin(), cloudflareAnalytics()],
-})
+}))

@@ -22,6 +22,7 @@ import SongPlayer from "../pieces/SongPlayer";
 import ReadingControls from "./ReadingControls";
 import ShareButton from "../pieces/ShareButton";
 import { useCurrentSong } from "../../lib/useSongAudio";
+import PrintBackdrop from "./PrintBackdrop";
 import DreamScape, { DreamScene } from "./DreamScape";
 import { SCENE_COUNT } from "./scenes";
 import { SceneClockContext, createSceneClock } from "./sceneClock";
@@ -81,7 +82,8 @@ function CoverFace({ publication, frozenAhead }: { publication: Publication; fro
   return (
     <div className="sr-cover">
       {publication.coverSrc ? (
-        <img className="sr-cover-img" src={publication.coverSrc} alt={publication.coverAlt ?? ""} />
+        <img className="sr-cover-img" src={publication.coverSrc} alt={publication.coverAlt ?? ""}
+          style={publication.readerScenery ? { objectPosition: "66% center" } : undefined} />
       ) : (
         <DreamScene scene={0} className="sr-cover-art" frozenAhead={frozenAhead} clockKey="cover" />
       )}
@@ -127,11 +129,13 @@ function PartnerTab({
 // `live` is false for the copies of a page drawn on the turning leaf: they show the same
 // song state but cannot be used, so the page at rest stays the only working player.
 function PlateFace({
+  artwork,
   page,
   index,
   live,
   frozenAhead,
 }: {
+  artwork?: string;
   page: MagazinePage;
   index: number;
   live: boolean;
@@ -154,12 +158,11 @@ function PlateFace({
       className={`sr-plate is-${piece.type} scene-${scene} crop-${index % 4}`}
       style={partner?.logoScale ? ({ "--logo-scale": partner.logoScale } as CSSProperties) : undefined}
     >
-      <DreamScene
-        scene={scene}
-        className="sr-plate-art"
-        frozenAhead={frozenAhead}
-        clockKey={`plate-${index}`}
-      />
+      {artwork ? (
+        <img className="sr-plate-art sr-print-plate" src={artwork} alt="" />
+      ) : (
+        <DreamScene scene={scene} className="sr-plate-art" frozenAhead={frozenAhead} clockKey={`plate-${index}`} />
+      )}
       <div className="sr-plate-shade" />
       {partner && (
         // The logo opens this partner's write-up on Our partners. A copy on the turning leaf
@@ -375,6 +378,15 @@ function SurrealBook({ publication }: { publication: Publication }) {
       if (partner.logoOnDark) new Image().src = partnerLogoUrl(partner, true);
     }
   }, [publication]);
+  useEffect(() => {
+    if (!publication.readerScenery) return;
+    // The turning leaf needs its art decoded before it becomes the visible page.
+    for (const source of Object.values(publication.readerScenery.plates)) {
+      const image = new Image();
+      image.src = source;
+      void image.decode().catch(() => {});
+    }
+  }, [publication.readerScenery]);
   const spread = useMediaQuery("(min-width: 900px)");
   const flipSeconds = spread ? FLIP_SECONDS : 0.5;
   const last = pages.length - 1;
@@ -447,7 +459,7 @@ function SurrealBook({ publication }: { publication: Publication }) {
     if (!p.piece) return side === "L" ? null : <CoverFace publication={publication} frozenAhead={frozen(copy)} />;
     // A new page needs its own scene mount: reusing the previous plate also
     // reused its birth time, making the incoming artwork jump ahead on landing.
-    if (side === "L") return <PlateFace key={p.id} page={p} index={i} live={!copy && i === index && !flip} frozenAhead={frozen(copy)} />;
+    if (side === "L") return <PlateFace key={p.id} artwork={publication.readerScenery?.plates[p.id]} page={p} index={i} live={!copy && i === index && !flip} frozenAhead={frozen(copy)} />;
     return (
       <TextFace
         key={p.id}
@@ -529,7 +541,11 @@ function SurrealBook({ publication }: { publication: Publication }) {
   return (
     // The backdrop changes once a turn has landed, so its crossfade never competes with the turn.
     <div className="sr-reader" data-scene={sceneFor(shown)}>
-      <DreamScape scene={sceneFor(shown)} paused={flip !== null} />
+      {publication.readerScenery ? (
+        <PrintBackdrop scenery={publication.readerScenery} index={shown} paused={flip !== null} reduced={reduced} />
+      ) : (
+        <DreamScape scene={sceneFor(shown)} paused={flip !== null} />
+      )}
       <div className="sr-chrome sr-top">
         <Link to="/" className="sr-pill sr-back">
           <span aria-hidden="true">←</span> All issues

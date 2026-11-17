@@ -1,4 +1,5 @@
 import { useRef, useState, type CSSProperties } from "react";
+import { wallPreview } from "../../lib/wallPreview";
 import { songCredit, verseLine } from "../../lib/verse";
 import { Link } from "react-router-dom";
 import type { Publication } from "../../data/publications";
@@ -89,7 +90,8 @@ function PieceWork({ page, index, live }: { page: MagazinePage; index: number; l
       <div className="gal-work gal-film">
         <span className="gal-film-tag">Now showing</span>
         {piece.videoSrc ? (
-          <video src={piece.videoSrc} controls preload="metadata" />
+          live ? <video src={piece.videoSrc} poster={wallPreview(piece.videoSrc)} controls preload="metadata" />
+            : <div className="gal-film-empty">{wallPreview(piece.videoSrc) && <img src={wallPreview(piece.videoSrc)} alt="" />}</div>
         ) : (
           <div className="gal-film-empty">
             <span className="gal-play" aria-hidden="true" />
@@ -235,8 +237,8 @@ export default function GalleryReader({ publication }: { publication: Publicatio
         <div className="gal-floor" />
       </div>
       <header className="gal-top">
-        <Link to="/" className="gal-back">
-          <span aria-hidden="true">←</span> All issues
+        <Link to="/gallery/" className="gal-back">
+          <span aria-hidden="true">←</span> Gallery
         </Link>
         <p className="gal-title">
           The New Journal <i>—</i>{" "}
@@ -254,7 +256,7 @@ export default function GalleryReader({ publication }: { publication: Publicatio
             onSelect={goToPiece}
             onCover={() => goTo(0)}
           />
-          <ShareButton key={piece?.id ?? publication.id} publication={publication} piece={piece} />
+          <ShareButton key={piece?.id ?? publication.id} publication={publication} piece={piece} gallery={publication.theme !== "museum"} />
         </div>
       </header>
 

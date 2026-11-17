@@ -6,144 +6,53 @@
   pointer-events: none;
   background: #121110;
 }
+body:has(.gw-page) { background: #121110; }
 .gw-page {
   padding-top: 124px;
   color: #efe6d6;
 }
-.gw-heading h1 {
-  font: 400 clamp(34px, 4.5vw, 52px) / 1 "Cormorant Garamond", Georgia, serif;
+.gw-heading, .gw-exhibition-head { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+.gw-heading { padding-bottom: 20px; border-bottom: 1px solid #70685a; }
+.gw-heading h1 { font: 400 clamp(52px, 6vw, 84px)/1 "Cormorant Garamond", Georgia, serif; }
+.gw-heading > span, .gw-exhibition-head small, .gw-plate small { font: 400 13px/1.45 var(--font-body); color: #c5bbaa; }
+.gw-exhibition { margin-top: 26px; }
+.gw-exhibition + .gw-exhibition { margin-top: 64px; }
+.gw-exhibition-head { flex-wrap: wrap; gap: 4px 16px; }
+.gw-exhibition-head h2 { font: 500 clamp(24px, 3vw, 36px)/1.15 "Cormorant Garamond", Georgia, serif; }
+.gw-exhibition-head small { display: inline-block; margin-left: .5em; white-space: nowrap; }
+.gw-walk { display: inline-flex; align-items: center; gap: .6em; min-height: 44px; font-size: 14px; text-decoration: underline; text-underline-offset: .3em; }
+.gw-empty { margin-top: 48px; }
+.gw-wallgrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 42px clamp(20px, 4vw, 56px); list-style: none; padding: 0; margin: 18px 0 0; }
+.gw-card { display: block; text-align: left; }
+.gw-page :is(button,a):focus-visible { outline: 2px solid #efe6d6; outline-offset: 4px; }
+.gw-mount {
+  display: grid; grid-template: minmax(0,1fr) / minmax(0,1fr); place-items: center; container-type: inline-size; overflow: hidden;
+  aspect-ratio: 1.95; padding: 2%; background: #343531;
 }
-.gw-empty {
-  margin-top: 64px;
-  font: italic 500 22px "Cormorant Garamond", Georgia, serif;
-  color: rgba(239, 230, 214, 0.75);
+.gw-mount > span, .gw-cassette { transition: transform .36s ease-out; }
+.gw-mount-poem { background: #38423d; }
+.gw-sheet {
+  position: relative; display: grid; align-content: center; width: 72%; height: 79%; padding: 5% 7%;
+  transform: rotate(-3deg); color: #35382f; background: linear-gradient(173deg, #ede9dc 60%, #d5d1c4 60.5%, #e6e3d6 62%);
+  box-shadow: 3px 8px 12px #151b1870; font: italic 500 clamp(17px, 4.8cqw, 28px)/1.2 "Cormorant Garamond", Georgia, serif;
 }
-.gw-wallgrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 40px 24px;
-  align-items: start;
-  list-style: none;
-  padding: 0;
-  margin: 48px 0 0;
+.gw-sheet > span { display: block; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.gw-mount-art { background: #5a4c40; }
+.gw-frame { display: grid; place-items: center; max-width: 88%; height: 87%; padding: 7px; background: #d9d1c3; border: 4px solid #383129; box-shadow: 4px 7px 12px #1a120e80; }
+.gw-frame img { display: block; width: auto; max-width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.gw-mount-film { background: #292e2b; }
+.gw-screen { width: 82%; aspect-ratio: 16/9; max-height: 94%; position: relative; display: grid; place-items: center; background: #161915; box-shadow: 2px 5px 13px #12151066; }
+.gw-screen img { position: absolute; width: 100%; height: 100%; object-fit: contain; }
+.gw-play { position: absolute; right: 12px; bottom: 12px; width: 35px; height: 35px; border-radius: 50%; border: 1px solid #ece5cf99; background: #141813cc; display: grid; place-items: center; }
+.gw-play::after { content: ""; border: solid transparent; border-width: 6px 0 6px 9px; border-left-color: #efe6d6; margin-left: 2px; }
+.gw-mount-song { background: #595046; }
+.gw-cassette { width: 57%; transform: rotate(4deg); filter: drop-shadow(3px 7px 5px #231b1580); }
+.gw-plate { display: grid; gap: 4px; padding-top: 13px; }
+.gw-plate strong { font: 500 clamp(23px, 2.3vw, 31px)/1.13 "Cormorant Garamond", Georgia, serif; color: #f6ecdb; text-wrap: pretty; }
+.gw-plate > span { font-size: 14px; line-height: 1.5; color: #d5cbbc; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gw-card:hover .gw-mount > *, .gw-card:focus-visible .gw-mount > * { transform: translateY(-2px) rotate(0deg) scale(1.025); }
 }
-.gw-card {
-  position: relative;
-  display: block;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-}
-.gw-card:focus-visible {
-  outline: 2px solid #efe6d6;
-  outline-offset: 6px;
-}
-/* Every work sits in the same 4:5 box, so titles line up across a row. */
-.gw-frame,
-.gw-blank,
-.gw-sheet,
-.gw-screen,
-.gw-tape {
-  display: block;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  background: #1c1a18;
-  outline: 1px solid rgba(239, 230, 214, 0.08);
-  transition: outline-color 0.25s, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.gw-card:hover :is(.gw-frame, .gw-blank, .gw-sheet, .gw-screen, .gw-tape) {
-  outline-color: rgba(239, 230, 214, 0.55);
-  transform: translateY(-3px);
-}
-.gw-frame img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.gw-blank,
-.gw-sheet,
-.gw-screen,
-.gw-tape {
-  display: grid;
-  align-content: center;
-  gap: 4px;
-  padding: 28px 26px;
-  font: italic 500 19px / 1.5 "Cormorant Garamond", Georgia, serif;
-  color: rgba(239, 230, 214, 0.88);
-}
-/* Each line is held to three rows, so long lyrics never spill out of the box. */
-.gw-sheet > span,
-.gw-tape > span {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-/* A film is a screen with a play mark. */
-.gw-screen {
-  place-items: center;
-  background: radial-gradient(circle at 50% 45%, #26231f, #151311);
-}
-.gw-play {
-  width: 64px;
-  height: 64px;
-  border: 1px solid rgba(239, 230, 214, 0.45);
-  border-radius: 50%;
-  position: relative;
-  background: rgba(12, 11, 9, 0.35);
-}
-.gw-play::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 54%;
-  border-style: solid;
-  border-width: 11px 0 11px 18px;
-  border-color: transparent transparent transparent rgba(239, 230, 214, 0.9);
-  transform: translate(-50%, -50%);
-}
-/* A round arrow in the corner says the work opens */
-.gw-card::after {
-  content: "\2197";
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  font-size: 15px;
-  color: #efe6d6;
-  background: rgba(12, 11, 9, 0.62);
-  border: 1px solid rgba(239, 230, 214, 0.35);
-  backdrop-filter: blur(6px);
-  transition: background 0.2s, color 0.2s;
-}
-.gw-card:hover::after,
-.gw-card:focus-visible::after {
-  background: #efe6d6;
-  color: #121110;
-}
-/* Title and author sit under each work */
-.gw-plate {
-  display: grid;
-  gap: 2px;
-  padding: 14px 2px 0;
-}
-.gw-plate strong {
-  font: 500 20px / 1.15 "Cormorant Garamond", Georgia, serif;
-  color: #f6ecdb;
-}
-.gw-plate span {
-  font-size: 13px;
-  color: rgba(239, 230, 214, 0.75);
-}
-.gw-plate small {
-  display: none;
-}
-
 /* Looking closer */
 .gw-dialog {
   position: fixed;
@@ -220,30 +129,6 @@
 @media (prefers-reduced-motion: reduce) {
   .gw-card * {
     transition: none !important;
-  }
-}
-/* Phones: one work per row, with writing, film and song in shorter boxes. */
-@media (max-width: 599px) {
-  .gw-wallgrid {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-  .gw-blank,
-  .gw-sheet,
-  .gw-screen,
-  .gw-tape {
-    aspect-ratio: 4 / 3;
-  }
-}
-/* Touch screens: a tap shouldn't leave a work stuck in its lifted hover state. */
-@media (hover: none) {
-  .gw-card:hover :is(.gw-frame, .gw-blank, .gw-sheet, .gw-screen, .gw-tape) {
-    outline-color: rgba(239, 230, 214, 0.08);
-    transform: none;
-  }
-  .gw-card:hover::after {
-    background: rgba(12, 11, 9, 0.62);
-    color: #efe6d6;
   }
 }
 /* Phones on their side: let the painting use the height there is. */
@@ -331,9 +216,7 @@
     gap: 34px;
     margin-top: 30px;
   }
-  .gw-card:active :is(.gw-frame, .gw-sheet, .gw-screen, .gw-tape) {
-    transform: scale(0.985);
-  }
+  .gw-mount { aspect-ratio: 1.8; }
   .gw-plate {
     gap: 5px;
   }

@@ -1667,3 +1667,50 @@ html[data-read-tone="night"] .sr-body::-webkit-scrollbar-thumb {
     padding-left: 58px;
   }
 }
+
+/* Both tide frames move together so the skyline stays registered throughout. */
+.sr-print-backdrop { background: #263d3d; }
+.sr-print-world {
+  position: absolute;
+  inset: -3%;
+  animation: sr-print-drift 36s ease-in-out infinite alternate;
+}
+.sr-print-world img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 72% center;
+}
+.sr-print-tide, .sr-print-glint { position: absolute; inset: 0; }
+.sr-print-glint::before {
+  content: "";
+  position: absolute;
+  inset: 46% 8% 10%;
+  background: radial-gradient(ellipse at center, #f8d4a426, transparent 67%);
+  animation: sr-tide-light 12s ease-in-out infinite alternate;
+}
+.sr-print-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, #152b2ce8, #21353257 35%, #21353245 62%, #142827e0),
+    radial-gradient(ellipse at center, transparent 36%, #14282980);
+}
+.sr-print-backdrop[data-paused="true"] .sr-print-world,
+.sr-print-backdrop[data-paused="true"] .sr-print-glint::before { animation-play-state: paused; }
+.sr-plate-art.sr-print-plate { width: 100%; height: 100%; object-fit: cover; transform: none; }
+.sr-book.is-single .sr-print-plate { object-position: center 12%; }
+@keyframes sr-print-drift {
+  from { transform: translate3d(-0.6%, 0, 0) scale(1.01); }
+  to { transform: translate3d(0.8%, -0.8%, 0) scale(1.035); }
+}
+@keyframes sr-tide-light {
+  from { opacity: .24; transform: translateX(-6%); }
+  to { opacity: .68; transform: translateX(7%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sr-print-world, .sr-print-glint::before { animation: none; }
+}

@@ -1,3 +1,5 @@
+import { readerPath } from "../../lib/publicPages";
+import Cassette from "../Cassette";
 import {
   useEffect,
   useLayoutEffect,
@@ -69,7 +71,8 @@ function Cover({ publication }: { publication: Publication }) {
   return (
     <>
       {publication.coverSrc ? (
-        <img className="tc-art" src={publication.coverSrc} alt="" />
+        <img className="tc-art" src={publication.coverSrc} alt=""
+          style={publication.readerScenery ? { objectPosition: "66% center" } : undefined} />
       ) : (
         <DreamScene scene={publication.issueNumber === "01" ? 1 : 0} className="tc-art" />
       )}
@@ -105,7 +108,7 @@ function TableCover({
   const navigate = useNavigate();
   const theme = publication.theme ?? "surreal";
   const cover = useRef<HTMLDivElement>(null);
-  const to = `/publication/${publication.id}`;
+  const to = readerPath(publication);
   const lie = LIE[index % LIE.length];
 
   // The table measures this cover when a reader comes back to it.
@@ -138,7 +141,7 @@ function TableCover({
           zIndex: lifted ? 50 : index + 1,
         } as CSSProperties
       }
-      aria-label={`Open ${publication.caption}, ${issueName(publication)}, ${themeNames[theme]} edition`}
+      aria-label={publication.previewPath ? `Open ${publication.caption}, local book preview` : `Open ${publication.caption}, ${issueName(publication)}, ${themeNames[theme]} edition`}
       onClick={click}
       onPointerEnter={(event: PointerEvent) => {
         if (event.pointerType === "mouse") onLift(publication.id);
@@ -212,26 +215,6 @@ function Polaroid() {
     <div className="table-polaroid" aria-hidden="true">
       <DreamScene scene={2} className="table-polaroid-art" />
     </div>
-  );
-}
-
-function Cassette() {
-  return (
-    <svg className="table-cassette" viewBox="0 0 200 128" aria-hidden="true" focusable="false">
-      <rect x="1" y="1" width="198" height="126" rx="8" fill="#26231f" />
-      <rect x="14" y="12" width="172" height="74" rx="4" fill="#efe3c8" />
-      <rect x="14" y="12" width="172" height="16" rx="4" fill="#c4553a" />
-      <path d="M26 44h148" stroke="#b8a888" strokeWidth="1" />
-      <text x="28" y="40" fontFamily="'Cormorant Garamond', Georgia, serif" fontStyle="italic" fontSize="13" fill="#3b2a1c">songs, side A</text>
-      <rect x="50" y="50" width="100" height="30" rx="15" fill="#1a1815" />
-      <circle cx="66" cy="65" r="11" fill="#efe3c8" />
-      <circle cx="134" cy="65" r="11" fill="#efe3c8" />
-      <circle cx="66" cy="65" r="5" fill="#1a1815" />
-      <circle cx="134" cy="65" r="5" fill="#1a1815" />
-      <path d="M44 126l10-26h92l10 26" fill="#34302a" />
-      <circle cx="74" cy="114" r="4" fill="#1a1815" />
-      <circle cx="126" cy="114" r="4" fill="#1a1815" />
-    </svg>
   );
 }
 

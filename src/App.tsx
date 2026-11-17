@@ -1,11 +1,13 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Navigate, Route, BrowserRouter, Routes, useLocation } from "react-router-dom";
+import { Link, Navigate, Route, BrowserRouter, Routes, useLocation } from "react-router-dom";
 import {
   AnimatePresence,
   MotionConfig,
   motion,
   useReducedMotion,
 } from "framer-motion";
+import { bookStudyEnabled, StudyReader, studyPath } from "./components/estuary/preview";
+import PageHead from "./components/PageHead";
 import NavBar from "./components/NavBar";
 import GlowField from "./components/GlowField";
 import TableScene from "./components/table/TableScene";
@@ -14,9 +16,10 @@ import Gallery from "./pages/Gallery";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Partners from "./pages/Partners";
-import PublicationViewer from "./pages/PublicationViewer";
 import { JournalProvider } from "./lib/JournalContext";
 import EnterOverlay from "./components/EnterOverlay";
+
+const PublicationViewer = lazy(() => import("./pages/PublicationViewer"));
 
 // The editor is a developer tool: it is only bundled and routed under `npm run dev`.
 const Preview = import.meta.env.DEV ? lazy(() => import("./pages/Preview")) : null;
@@ -26,7 +29,7 @@ const Preview = import.meta.env.DEV ? lazy(() => import("./pages/Preview")) : nu
 const TABLE_PAGES = ["/", "/about", "/partners", "/preview"];
 
 function Backdrop() {
-  const { pathname } = useLocation();
+  const pathname = useLocation().pathname.replace(/\/$/, "") || "/";
   const table = TABLE_PAGES.includes(pathname);
   useEffect(() => {
     if (table) document.documentElement.dataset.scene = "table";
@@ -35,7 +38,7 @@ function Backdrop() {
     if (pathname === "/preview") document.documentElement.dataset.page = "editor";
     else delete document.documentElement.dataset.page;
   }, [table, pathname]);
-  if (pathname.startsWith("/publication/")) return null;
+  if (pathname.startsWith("/publication/") || (bookStudyEnabled && pathname + "/" === studyPath)) return null;
   if (pathname === "/gallery") return <GalleryWall />;
   return table ? <TableScene /> : <GlowField />;
 }
@@ -43,14 +46,16 @@ function Backdrop() {
 function AnimatedRoutes() {
   const location = useLocation();
   const reduced = useReducedMotion();
+  // Individual leaves share one mounted reader so page turns and audio keep their state.
+  const scene = location.pathname.match(/^\/publication\/[^/]+/)?.[0] ?? location.pathname;
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location.pathname]);
+  }, [scene]);
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={location.pathname}
+        key={scene}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -62,10 +67,12 @@ function AnimatedRoutes() {
             path="/preview"
             element={Preview ? <Suspense fallback={null}><Preview /></Suspense> : <Navigate to="/" replace />}
           />
+          {StudyReader && <Route path={studyPath} element={<Suspense fallback={null}><StudyReader /></Suspense>} />}
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/about" element={<About />} />
           <Route path="/partners" element={<Partners />} />
-          <Route path="/publication/:pubId" element={<PublicationViewer />} />
+          <Route path="/publication/:pubId/:slug?" element={<Suspense fallback={null}><PublicationViewer /></Suspense>} />
+          <Route path="*" element={<main className="plain-reader"><h1>Page not found</h1><Link to="/">Return to the journal</Link></main>} />
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -77,6 +84,7 @@ export default function App() {
     <MotionConfig reducedMotion="user">
       <JournalProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || undefined}>
+          <PageHead />
           <Backdrop />
           <NavBar />
           <AnimatedRoutes />

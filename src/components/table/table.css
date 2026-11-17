@@ -983,3 +983,31 @@ body {
     font-size: 17px;
   }
 }
+
+.journal-mission {
+  position: relative;
+  max-width: 39ch;
+  font: 400 clamp(16px, 1.5vw, 21px)/1.4 "Cormorant Garamond", Georgia, serif;
+  text-wrap: pretty;
+}
+.home-contents {
+  width: min(100%, 38rem);
+  margin: clamp(24px, 5vw, 65px) auto 0;
+}
+.home-contents details { border-block-start: 1px solid currentColor; }
+.home-contents summary, .home-contents li a, .home-gallery-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 3px;
+  min-height: 44px;
+}
+.home-contents summary { cursor: pointer; list-style: none; font: 500 25px/1.2 "Cormorant Garamond", Georgia, serif; }
+.home-contents summary::-webkit-details-marker { display: none; }
+.contents-fold { width: 9px; height: 9px; border: solid currentColor; border-width: 0 1px 1px 0; transform: rotate(45deg); margin-right: 5px; }
+details[open] .contents-fold { transform: rotate(225deg); }
+.home-contents li a { border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent); font-size: 16px; }
+.home-contents li small { font-size: 12px; }
+.home-gallery-link { width: fit-content; font-size: 14px; }
+.home-contents a:hover { text-decoration: underline; text-underline-offset: .25em; }

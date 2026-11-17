@@ -65,6 +65,10 @@ npm run lint
 npm run check:preview
 ```
 
+### Estuary
+
+Run `npm ci` and `npm run dev`, then open the Estuary cover from the reading table or visit `/studies/estuary/`. Use `npm run build:book-study` to make a static review build in `dist`. The book study and its artwork are only included in development and the study build.
+
 ## Shared preview deployment
 
 The separate `../journal-share-preview` checkout contains the published static export and Sites identity in `.openai/hosting.json`. The export uses SPA fallback so reader and editor links survive reloads. Source work stays in this repository; rebuild and refresh that export before publishing changes through the Sites workflow.
