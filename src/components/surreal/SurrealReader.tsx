@@ -539,10 +539,10 @@ function SurrealBook({ publication }: { publication: Publication }) {
 
   const piece = page.piece;
   return (
-    // The backdrop changes once a turn has landed, so its crossfade never competes with the turn.
+    // The original dream scenes change on landing. Scenic editions can follow the turning page.
     <div className="sr-reader" data-scene={sceneFor(shown)}>
       {publication.readerScenery ? (
-        <PrintBackdrop scenery={publication.readerScenery} index={shown} paused={flip !== null} reduced={reduced} />
+        <PrintBackdrop scenery={publication.readerScenery} index={flip?.to ?? shown} turning={flip !== null} reduced={reduced} />
       ) : (
         <DreamScape scene={sceneFor(shown)} paused={flip !== null} />
       )}

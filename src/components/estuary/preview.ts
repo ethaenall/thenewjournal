@@ -18,7 +18,7 @@ export const studyPublication: Publication | null = bookStudyEnabled ? {
   readerScenery: {
     lowTide: panorama,
     highTide: imageRoot + "high-tide.webp",
-    tideLevels: [0, .16, .39, .69, 1],
+    tideLevels: [0, .24, .46, .71, 1],
     plates: {
       "salt-grass": imageRoot + "salt-grass.webp",
       "the-channel": imageRoot + "the-channel.webp",

@@ -1683,13 +1683,32 @@ html[data-read-tone="night"] .sr-body::-webkit-scrollbar-thumb {
   object-fit: cover;
   object-position: 72% center;
 }
-.sr-print-tide, .sr-print-glint { position: absolute; inset: 0; }
-.sr-print-glint::before {
-  content: "";
+.sr-print-tide, .sr-print-water, .sr-print-reflections, .sr-print-bank {
   position: absolute;
-  inset: 46% 8% 10%;
-  background: radial-gradient(ellipse at center, #f8d4a426, transparent 67%);
-  animation: sr-tide-light 12s ease-in-out infinite alternate;
+  inset: 0;
+}
+.sr-print-water {
+  /* Reflections and ripple crests taper out before they reach the horizon. */
+  mask-image: linear-gradient(180deg, transparent 31%, #000 45% 80%, transparent 100%);
+}
+.sr-print-reflections {
+  opacity: .32;
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(176deg, transparent 39%, #000 55%, transparent 69%, #000 81%, transparent 96%);
+}
+.sr-print-reflections img {
+  filter: brightness(.72) saturate(.78);
+  animation: sr-tide-reflection 8s ease-in-out infinite alternate;
+}
+.sr-print-ripples {
+  width: 100%;
+  height: 100%;
+  stroke: #dddcbc;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  filter: blur(.55px);
+  mix-blend-mode: screen;
+  animation: sr-tide-ripples 5.4s ease-in-out infinite alternate;
 }
 .sr-print-backdrop::after {
   content: "";
@@ -1699,18 +1718,21 @@ html[data-read-tone="night"] .sr-body::-webkit-scrollbar-thumb {
     linear-gradient(180deg, #152b2ce8, #21353257 35%, #21353245 62%, #142827e0),
     radial-gradient(ellipse at center, transparent 36%, #14282980);
 }
-.sr-print-backdrop[data-paused="true"] .sr-print-world,
-.sr-print-backdrop[data-paused="true"] .sr-print-glint::before { animation-play-state: paused; }
+.sr-print-backdrop[data-paused="true"] .sr-print-world { animation-play-state: paused; }
 .sr-plate-art.sr-print-plate { width: 100%; height: 100%; object-fit: cover; transform: none; }
 .sr-book.is-single .sr-print-plate { object-position: center 12%; }
 @keyframes sr-print-drift {
   from { transform: translate3d(-0.6%, 0, 0) scale(1.01); }
   to { transform: translate3d(0.8%, -0.8%, 0) scale(1.035); }
 }
-@keyframes sr-tide-light {
-  from { opacity: .24; transform: translateX(-6%); }
-  to { opacity: .68; transform: translateX(7%); }
+@keyframes sr-tide-reflection {
+  from { transform: translate3d(-.65%, -.22%, 0) scale(1.014); }
+  to { transform: translate3d(.65%, .22%, 0) scale(1.027); }
+}
+@keyframes sr-tide-ripples {
+  from { opacity: .52; transform: translate3d(-1%, -1%, 0); }
+  to { opacity: .94; transform: translate3d(1%, 2.2%, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sr-print-world, .sr-print-glint::before { animation: none; }
+  .sr-print-world, .sr-print-reflections img, .sr-print-ripples { animation: none; }
 }
