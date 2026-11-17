@@ -1668,80 +1668,32 @@ html[data-read-tone="night"] .sr-body::-webkit-scrollbar-thumb {
   }
 }
 
-/* Both tide frames move together so the skyline stays registered throughout. */
-.sr-print-backdrop { background: #263d3d; }
-.sr-print-world {
-  position: absolute;
-  inset: -3%;
-  animation: sr-print-drift 36s ease-in-out infinite alternate;
+/* The water moves inside the print while its skyline stays registered. */
+.sr-print-backdrop {
+  --sr-backdrop-focus: 72%;
+  background: #263d3d;
 }
-.sr-print-world img {
+.sr-print-backdrop img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 72% center;
+  object-position: var(--sr-backdrop-focus) center;
 }
-.sr-print-tide, .sr-print-water, .sr-print-reflections, .sr-print-bank {
+.sr-print-water, .sr-print-tide, .sr-print-reflection {
   position: absolute;
   inset: 0;
 }
 .sr-print-water {
-  /* Reflections and ripple crests taper out before they reach the horizon. */
-  mask-image: linear-gradient(180deg, transparent 31%, #000 45% 80%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 28%, #000 43%);
 }
-.sr-print-reflections {
-  opacity: .32;
+.sr-print-reflection {
   mix-blend-mode: screen;
-  mask-image: linear-gradient(176deg, transparent 39%, #000 55%, transparent 69%, #000 81%, transparent 96%);
+  mask-image: linear-gradient(180deg, transparent 44%, #000 60%, #0008 71%, #000 83%, transparent 100%);
 }
-.sr-print-reflections img {
-  filter: brightness(.72) saturate(.78);
-  animation: sr-tide-reflection 8s ease-in-out infinite alternate;
-}
-.sr-print-ripples {
-  width: 100%;
-  height: 100%;
-  stroke: #dddcbc;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  filter: blur(.55px);
-  mix-blend-mode: screen;
-  animation: sr-tide-ripples 5.4s ease-in-out infinite alternate;
-}
-.sr-print-rolling-shore {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  color: #cdd7bb;
-  pointer-events: none;
-  /* Leave the reading surface and central navigation in the foreground. */
-  mask-image: linear-gradient(90deg, #000 0%, #000 12%, #0003 32% 68%, #000 88% 100%);
-}
-.sr-print-rolling-shore svg {
-  position: absolute;
-  inset: -21px 0 auto;
-  width: 100%;
-  height: clamp(30px, 5vh, 52px);
-  overflow: visible;
-  opacity: .66;
-}
-.sr-print-rolling-shore path {
-  stroke: currentColor;
-  vector-effect: non-scaling-stroke;
-  stroke-linecap: round;
-}
-.sr-print-crest { stroke-width: 5px; filter: blur(2.4px); opacity: .49; }
-.sr-print-foam { stroke-width: 1.7px; filter: blur(.65px); opacity: .86; }
-.sr-print-afterwash { stroke-width: 2px; filter: blur(1.2px); opacity: .4; }
-@media (max-width: 899px) {
-  .sr-print-rolling-shore {
-    mask-image: linear-gradient(90deg, #000 0% 16%, #0003 31% 69%, #000 84% 100%);
-  }
-  .sr-print-rolling-shore svg { opacity: 1; }
-  .sr-print-crest { stroke-width: 7px; }
-  .sr-print-foam { stroke-width: 2.3px; }
+.sr-print-reflection img {
+  filter: brightness(.8) saturate(.85);
 }
 .sr-print-backdrop::after {
   content: "";
@@ -1751,21 +1703,12 @@ html[data-read-tone="night"] .sr-body::-webkit-scrollbar-thumb {
     linear-gradient(180deg, #152b2ce8, #21353257 35%, #21353245 62%, #142827e0),
     radial-gradient(ellipse at center, transparent 36%, #14282980);
 }
-.sr-print-backdrop[data-paused="true"] .sr-print-world { animation-play-state: paused; }
 .sr-plate-art.sr-print-plate { width: 100%; height: 100%; object-fit: cover; transform: none; }
 .sr-book.is-single .sr-print-plate { object-position: center 12%; }
-@keyframes sr-print-drift {
-  from { transform: translate3d(-0.6%, 0, 0) scale(1.01); }
-  to { transform: translate3d(0.8%, -0.8%, 0) scale(1.035); }
-}
-@keyframes sr-tide-reflection {
-  from { transform: translate3d(-.65%, -.22%, 0) scale(1.014); }
-  to { transform: translate3d(.65%, .22%, 0) scale(1.027); }
-}
-@keyframes sr-tide-ripples {
-  from { opacity: .52; transform: translate3d(-1%, -1%, 0); }
-  to { opacity: .94; transform: translate3d(1%, 2.2%, 0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .sr-print-world, .sr-print-reflections img, .sr-print-ripples { animation: none; }
+@media (max-width: 640px) and (orientation: portrait) {
+  /* Frame the channel and exposed flats in the narrow space beside the book. */
+  .sr-print-backdrop { --sr-backdrop-focus: 48%; }
+  .sr-print-backdrop::after {
+    background: linear-gradient(180deg, #152b2ce8, #21353242 32%, #21353240 67%, #142827e5);
+  }
 }

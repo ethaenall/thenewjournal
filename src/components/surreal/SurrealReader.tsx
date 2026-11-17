@@ -542,7 +542,7 @@ function SurrealBook({ publication }: { publication: Publication }) {
     // The original dream scenes change on landing. Scenic editions can follow the turning page.
     <div className="sr-reader" data-scene={sceneFor(shown)}>
       {publication.readerScenery ? (
-        <PrintBackdrop scenery={publication.readerScenery} index={flip?.to ?? shown} turning={flip !== null} reduced={reduced} />
+        <PrintBackdrop scenery={publication.readerScenery} index={flip?.to ?? shown} reduced={reduced} />
       ) : (
         <DreamScape scene={sceneFor(shown)} paused={flip !== null} />
       )}
