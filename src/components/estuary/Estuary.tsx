@@ -1,6 +1,5 @@
 import { Navigate, useSearchParams } from "react-router-dom";
-import SurrealReader from "../surreal/SurrealReader";
-import { SongAudioProvider } from "../../lib/SongAudioProvider";
+import EstuaryBook from "./EstuaryBook";
 import { readerPath } from "../../lib/publicPages";
 import { studyPublication } from "./preview";
 
@@ -14,9 +13,5 @@ export default function Estuary() {
     return <Navigate replace to={readerPath(studyPublication, studyPublication.pieces[page - 1])} />;
   }
 
-  return (
-    <SongAudioProvider>
-      <SurrealReader publication={studyPublication} />
-    </SongAudioProvider>
-  );
+  return <EstuaryBook publication={studyPublication} />;
 }

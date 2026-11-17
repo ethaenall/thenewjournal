@@ -6,7 +6,8 @@ export const studyPath = "/studies/estuary/";
 const imageRoot = import.meta.env.BASE_URL + (import.meta.env.DEV
   ? "src/components/estuary/"
   : "studies/estuary/");
-const panorama = imageRoot + "estuary.webp";
+export const studyArt = (file: string) => imageRoot + file;
+const panorama = studyArt("estuary.webp");
 
 export const studyPublication: Publication | null = bookStudyEnabled ? {
   id: "estuary",
@@ -14,7 +15,8 @@ export const studyPublication: Publication | null = bookStudyEnabled ? {
   theme: "surreal",
   issueNumber: "02",
   previewPath: studyPath,
-  coverSrc: panorama,
+  coverSrc: studyArt("binding.webp"),
+  coverAlt: "Ivory egret and gold salt grass stamped into deep teal bookcloth",
   readerScenery: {
     lowTide: panorama,
     highTide: imageRoot + "high-tide.webp",

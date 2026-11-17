@@ -15,14 +15,10 @@ import {
   useMediaQuery,
 } from "../../lib/useIssueNav";
 import { useFinishEnterOnMount } from "../../lib/enterTransition";
-import { PREVIEW_ID } from "../../lib/preview";
 import { partnerById, partnerLogoUrl } from "../../data/partners";
-import IssueContents from "../pieces/IssueContents";
 import SongPlayer from "../pieces/SongPlayer";
-import ReadingControls from "./ReadingControls";
-import ShareButton from "../pieces/ShareButton";
 import { useCurrentSong } from "../../lib/useSongAudio";
-import PrintBackdrop from "./PrintBackdrop";
+import { ReaderHeader, ReaderFooter } from "./ReaderChrome";
 import DreamScape, { DreamScene } from "./DreamScape";
 import { SCENE_COUNT } from "./scenes";
 import { SceneClockContext, createSceneClock } from "./sceneClock";
@@ -82,8 +78,7 @@ function CoverFace({ publication, frozenAhead }: { publication: Publication; fro
   return (
     <div className="sr-cover">
       {publication.coverSrc ? (
-        <img className="sr-cover-img" src={publication.coverSrc} alt={publication.coverAlt ?? ""}
-          style={publication.readerScenery ? { objectPosition: "66% center" } : undefined} />
+        <img className="sr-cover-img" src={publication.coverSrc} alt={publication.coverAlt ?? ""} />
       ) : (
         <DreamScene scene={0} className="sr-cover-art" frozenAhead={frozenAhead} clockKey="cover" />
       )}
@@ -129,13 +124,11 @@ function PartnerTab({
 // `live` is false for the copies of a page drawn on the turning leaf: they show the same
 // song state but cannot be used, so the page at rest stays the only working player.
 function PlateFace({
-  artwork,
   page,
   index,
   live,
   frozenAhead,
 }: {
-  artwork?: string;
   page: MagazinePage;
   index: number;
   live: boolean;
@@ -158,11 +151,7 @@ function PlateFace({
       className={`sr-plate is-${piece.type} scene-${scene} crop-${index % 4}`}
       style={partner?.logoScale ? ({ "--logo-scale": partner.logoScale } as CSSProperties) : undefined}
     >
-      {artwork ? (
-        <img className="sr-plate-art sr-print-plate" src={artwork} alt="" />
-      ) : (
-        <DreamScene scene={scene} className="sr-plate-art" frozenAhead={frozenAhead} clockKey={`plate-${index}`} />
-      )}
+      <DreamScene scene={scene} className="sr-plate-art" frozenAhead={frozenAhead} clockKey={`plate-${index}`} />
       <div className="sr-plate-shade" />
       {partner && (
         // The logo opens this partner's write-up on Our partners. A copy on the turning leaf
@@ -378,15 +367,6 @@ function SurrealBook({ publication }: { publication: Publication }) {
       if (partner.logoOnDark) new Image().src = partnerLogoUrl(partner, true);
     }
   }, [publication]);
-  useEffect(() => {
-    if (!publication.readerScenery) return;
-    // The turning leaf needs its art decoded before it becomes the visible page.
-    for (const source of Object.values(publication.readerScenery.plates)) {
-      const image = new Image();
-      image.src = source;
-      void image.decode().catch(() => {});
-    }
-  }, [publication.readerScenery]);
   const spread = useMediaQuery("(min-width: 900px)");
   const flipSeconds = spread ? FLIP_SECONDS : 0.5;
   const last = pages.length - 1;
@@ -459,7 +439,7 @@ function SurrealBook({ publication }: { publication: Publication }) {
     if (!p.piece) return side === "L" ? null : <CoverFace publication={publication} frozenAhead={frozen(copy)} />;
     // A new page needs its own scene mount: reusing the previous plate also
     // reused its birth time, making the incoming artwork jump ahead on landing.
-    if (side === "L") return <PlateFace key={p.id} artwork={publication.readerScenery?.plates[p.id]} page={p} index={i} live={!copy && i === index && !flip} frozenAhead={frozen(copy)} />;
+    if (side === "L") return <PlateFace key={p.id} page={p} index={i} live={!copy && i === index && !flip} frozenAhead={frozen(copy)} />;
     return (
       <TextFace
         key={p.id}
@@ -539,38 +519,9 @@ function SurrealBook({ publication }: { publication: Publication }) {
 
   const piece = page.piece;
   return (
-    // The original dream scenes change on landing. Scenic editions can follow the turning page.
     <div className="sr-reader" data-scene={sceneFor(shown)}>
-      {publication.readerScenery ? (
-        <PrintBackdrop scenery={publication.readerScenery} index={flip?.to ?? shown} reduced={reduced} />
-      ) : (
-        <DreamScape scene={sceneFor(shown)} paused={flip !== null} />
-      )}
-      <div className="sr-chrome sr-top">
-        <Link to="/" className="sr-pill sr-back">
-          <span aria-hidden="true">←</span> All issues
-        </Link>
-        <p className="sr-edition">
-          <Link to="/" aria-label="The New Journal, back to the home page">
-            The New Journal
-          </Link>
-        </p>
-        <div className="sr-actions reader-actions">
-          {import.meta.env.DEV && publication.id === PREVIEW_ID && (
-            <Link className="contents-trigger micro-button sr-pill" to="/preview">
-              Edit issue
-            </Link>
-          )}
-          <ReadingControls />
-          <IssueContents
-            pieces={publication.pieces}
-            currentIndex={publication.pieces.findIndex((p) => p.id === piece?.id)}
-            onSelect={goToPiece}
-            onCover={() => goTo(0)}
-          />
-          <ShareButton key={piece?.id ?? publication.id} publication={publication} piece={piece} />
-        </div>
-      </div>
+      <DreamScape scene={sceneFor(shown)} paused={flip !== null} />
+      <ReaderHeader publication={publication} piece={piece} goToPiece={goToPiece} onCover={restart} />
 
       <main className="sr-stage" inert={flip !== null} aria-busy={flip !== null}>
         <motion.div
@@ -641,26 +592,7 @@ function SurrealBook({ publication }: { publication: Publication }) {
         </motion.div>
       </main>
 
-      <nav className="sr-chrome sr-bottom" aria-label="Pages">
-        <button type="button" className="sr-round" aria-label="Previous page" disabled={index === 0} onClick={() => step(-1)}>
-          ←
-        </button>
-        <div className="sr-progress">
-          <span className="sr-position" aria-live="polite" aria-atomic="true">
-            {index === 0 ? "Cover" : `${index} / ${last}`}
-          </span>
-          <span className="sr-stars" aria-hidden="true">
-            {pages.length <= 24 &&
-              pages.map((p, i) => (
-                <i key={p.id} className={i === index ? "is-on" : i < index ? "is-past" : ""} />
-              ))}
-          </span>
-          <span className="sr-now">{piece?.title ?? publication.caption}</span>
-        </div>
-        <button type="button" className="sr-round" aria-label="Next page" disabled={index === last} onClick={() => step(1)}>
-          →
-        </button>
-      </nav>
+      <ReaderFooter publication={publication} piece={piece} index={index} pages={pages} step={step} />
     </div>
   );
 }

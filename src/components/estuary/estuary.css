@@ -1,0 +1,229 @@
+/* The water moves inside the print while its skyline stays registered. */
+.sr-print-backdrop {
+  --sr-backdrop-focus: 72%;
+  background: #263d3d;
+}
+.sr-print-backdrop img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--sr-backdrop-focus) center;
+}
+.sr-print-water, .sr-print-tide, .sr-print-reflection {
+  position: absolute;
+  inset: 0;
+}
+.sr-print-water {
+  mask-image: linear-gradient(180deg, transparent 28%, #000 43%);
+}
+.sr-print-reflection {
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(180deg, transparent 44%, #000 60%, #0008 71%, #000 83%, transparent 100%);
+}
+.sr-print-reflection img {
+  filter: brightness(.8) saturate(.85);
+}
+.sr-print-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, #152b2ce8, #21353257 35%, #21353245 62%, #142827e0),
+    radial-gradient(ellipse at center, transparent 36%, #14282980);
+}
+@media (max-width: 640px) and (orientation: portrait) {
+  /* Frame the channel and exposed flats in the narrow space beside the book. */
+  .sr-print-backdrop { --sr-backdrop-focus: 48%; }
+  .sr-print-backdrop::after {
+    background: linear-gradient(180deg, #152b2ce8, #21353242 32%, #21353240 67%, #142827e5);
+  }
+}
+
+html:has(.eb-reader) { scrollbar-gutter: auto; }
+.eb-reader {
+  --eb-paper: #f3efdf;
+  --eb-ink: #253c39;
+  --eb-muted: #55655b;
+  --eb-rule: #7c817366;
+  --eb-cloth: #123d3c;
+  --eb-edge: #c6bea6;
+  --eb-grain: linear-gradient(90deg, #50472e12, transparent 8%, #fff8e522 70%, #b8a27f12);
+  background: transparent;
+  min-height: 0;
+}
+.eb-reader .sr-pill, .eb-reader .sr-actions .micro-button, .eb-reader .sr-round {
+  background-color: rgb(17 42 42 / .7);
+  border-color: rgb(237 225 189 / .34);
+}
+.eb-reader .sr-stars i.is-on { box-shadow: none; background: #f7dfae; transform: scale(1.35); }
+.eb-reader .sr-print-backdrop::after {
+  background: linear-gradient(180deg, #0c292bd6 0%, #1a363b62 18%, #223b3b42 55%, #1532327a 80%, #0e2324dc 100%);
+}
+.eb-stage { min-height: 0; padding: 8px 16px; }
+.eb-book {
+  --pw: min(474px, 38vw, calc((100dvh - 184px) * .70));
+  position: relative;
+  width: calc(var(--pw) * 2);
+  height: calc(var(--pw) / .70);
+  perspective: calc(var(--pw) * 7.5);
+  perspective-origin: 50% 49%;
+  touch-action: pan-y pinch-zoom;
+}
+.eb-book[data-edge] { cursor: grab; }
+.eb-book[data-held] { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+.eb-slot {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: var(--pw);
+  overflow: hidden;
+  background: var(--eb-paper);
+  color: var(--eb-ink);
+  border-radius: 1px 3px 4px 1px;
+  box-shadow: 1px 1px 0 var(--eb-edge), 2px 2px 0 var(--eb-paper), 3px 3px 0 var(--eb-edge),
+    4px 5px 0 var(--eb-cloth), 5px 7px 7px #12262652, 10px 22px 33px #0d262560;
+}
+.eb-left { left: 0; border-radius: 3px 0 0 4px; box-shadow: -2px 2px var(--eb-edge), -3px 4px var(--eb-cloth), -6px 16px 28px #0d26255c; }
+.eb-right { right: 0; }
+.eb-jacket, .eb-plate, .eb-sheet, .eb-endpaper { position: absolute; inset: 0; }
+.eb-jacket, .eb-plate, .eb-endpaper { user-select: none; -webkit-user-select: none; }
+.eb-jacket {
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--eb-cloth);
+  color: #f5e7c3;
+  cursor: pointer;
+}
+.eb-binding { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
+.eb-jacket::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, #0006, transparent 1.8%, #e6e0a71a 2.5%, #031f214d 3.2%, transparent 5%);
+}
+.eb-jacket-type { position: absolute; top: 7%; left: 8%; right: 8%; text-align: center; }
+.eb-jacket-type p { font: 500 clamp(17px, 1.55vw, 25px)/1.2 var(--sr-serif); }
+.eb-jacket-type h1 { margin: .11em 0 .15em; color: inherit; font: 500 calc(var(--pw) * .188)/.91 var(--sr-serif); letter-spacing: -.048em; }
+.eb-jacket-type > span, .eb-open, .eb-folio, .eb-plate figcaption > span { font: 500 11px/1.35 var(--font-body); letter-spacing: .07em; }
+.eb-jacket-type > span { color: #d9cda6; }
+.eb-open {
+  position: absolute; z-index: 1; inset: auto 9% 3.4%;
+  display: flex; justify-content: space-between; align-items: center;
+  min-height: 44px; padding: 0 2px; border-top: 1px solid #e0d1a25e; color: #fff1cb;
+}
+.eb-open span { font-size: 21px; transition: transform .2s ease; }
+@media (hover: hover) { .eb-open:hover span { transform: translateX(4px); } }
+.eb-reader :is(button,a,.eb-sheet):focus-visible { outline: 2px solid #bf884c; outline-offset: 2px; }
+.eb-reader .eb-sheet:focus-visible { outline-offset: -4px; }
+.eb-plate {
+  margin: 0; padding: 7% 7% 4%; display: flex; flex-direction: column;
+  background: var(--eb-grain), var(--eb-paper);
+}
+.eb-plate img {
+  display: block; width: 100%; min-height: 0; flex: 1 1 0;
+  object-fit: cover; outline: 1px solid #1b373737; outline-offset: -1px;
+}
+.eb-plate figcaption { display: flex; align-items: baseline; justify-content: space-between; padding-top: 3.8%; color: var(--eb-muted); }
+.eb-plate figcaption i { font: italic 500 16px/1 var(--sr-serif); }
+.eb-sheet {
+  overflow: auto; overscroll-behavior-y: contain; scrollbar-width: thin;
+  scrollbar-color: var(--eb-edge) transparent; background: var(--eb-grain), var(--eb-paper);
+  color: var(--eb-ink); touch-action: pan-y pinch-zoom;
+}
+.eb-poem-page {
+  display: flex; flex-direction: column; min-height: 100%; padding: 6.7% 10% 5%;
+  background: var(--eb-grain), var(--eb-paper);
+}
+.eb-folio { display: flex; justify-content: space-between; align-items: baseline; color: var(--eb-muted); }
+.eb-folio i { font: italic 500 17px/1 var(--sr-serif); letter-spacing: 0; }
+header.eb-folio { padding-bottom: 12px; border-bottom: 1px solid var(--eb-rule); }
+footer.eb-folio { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--eb-rule); }
+.eb-verse-block {
+  margin: auto 0; padding: clamp(25px, 5vh, 56px) 0 clamp(16px, 3.8vh, 38px);
+  user-select: text; -webkit-user-select: text;
+}
+.eb-verse-block h1 {
+  font: italic 500 clamp(37px, 3.8vw, 60px)/1.03 var(--sr-serif);
+  letter-spacing: -.028em; color: var(--eb-ink); margin: 0 0 .52em;
+}
+.eb-verse { font: 500 calc(clamp(21px, 1.72vw, 27px) * var(--read-scale, 1))/1.41 var(--sr-serif); color: var(--eb-ink); }
+.eb-verse p { margin: 0; overflow-wrap: break-word; }
+.eb-credit { margin-top: 1.65em; color: var(--eb-muted); font: italic 500 15px/1.25 var(--sr-serif); }
+.eb-tailpiece {
+  flex: 0 0 auto; align-self: center;
+  width: 64%; aspect-ratio: 1.55; margin: 0 0 5%;
+  background: var(--frieze) var(--tail-position) center / 400% 100% no-repeat;
+  mix-blend-mode: multiply; opacity: .83;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 87%, transparent);
+}
+.eb-fin { display: flex; gap: 18px; align-items: center; justify-content: center; margin-bottom: 2%; }
+.eb-fin > * { display: inline-flex; align-items: center; min-height: 44px; color: var(--eb-ink); font: italic 500 16px var(--sr-serif); text-decoration: underline; text-underline-offset: 4px; }
+.eb-sheet ::selection { color: #172d29; background: #d6c49a; }
+.eb-endpaper { background: var(--frieze) center/auto 37% no-repeat, var(--eb-paper); background-blend-mode: multiply; }
+.eb-cast { position: absolute; right: 0; top: 0; bottom: 0; width: var(--pw); pointer-events: none; background: linear-gradient(90deg,#142321,transparent 90%); }
+.eb-cast.left { right: auto; left: 0; transform: scaleX(-1); }
+.eb-curl {
+  position: absolute; right: 0; top: 0; width: var(--pw); height: 100%;
+  transform-style: preserve-3d; z-index: 3; pointer-events: none;
+}
+.eb-curl.from-left { right: auto; left: 0; }
+.eb-band { position: absolute; height: 100%; left: 0; transform-origin: left center; transform-style: preserve-3d; }
+.eb-curl.from-left .eb-band { left: auto; right: 0; transform-origin: right center; }
+.eb-fragment {
+  position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  transform: translateZ(.04px); background: var(--eb-paper);
+}
+.eb-fragment.reverse { transform: rotateY(180deg) translateZ(.04px); }
+.eb-sample { position: absolute; top: 0; width: var(--pw); height: 100%; }
+.eb-fragment::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--shade-a), var(--shade-b)); opacity: var(--bend-light,0); }
+.eb-fragment.reverse::after { transform: scaleX(-1); }
+html[data-read-tone="night"] .eb-reader {
+  --eb-paper: #253431; --eb-ink: #f2ebd8; --eb-muted: #bbc1ad;
+  --eb-rule: #a3a99666; --eb-edge: #46504a;
+}
+html[data-read-tone="night"] .eb-reader .eb-tailpiece { filter: invert(1); mix-blend-mode: screen; opacity: .7; }
+@media (max-width: 899px), (max-height: 520px) {
+  .eb-book.single {
+    --pw: min(470px, calc(100vw - 46px), calc((100dvh - 144px) * .70));
+    width: var(--pw); height: calc(var(--pw) / .65); max-height: calc(100dvh - 142px);
+  }
+  .eb-book.single .eb-sheet { display: flex; flex-direction: column; }
+  .eb-book.single .eb-plate {
+    position: relative; inset: auto; flex: 0 0 37%; min-height: 118px;
+    padding: 4.3% 4.3% 0; background: var(--eb-paper);
+  }
+  .eb-book.single .eb-plate img { position: absolute; inset: 7% 4.3% 0; width: 91.4%; height: 93%; object-position: center 48%; }
+  .eb-book.single .eb-plate[data-piece="egret"] { flex-basis: 43%; }
+  .eb-book.single [data-piece="egret"] img { object-position: center 16%; }
+  .eb-book.single [data-piece="salt-grass"] img { object-position: center 16%; }
+  .eb-book.single [data-piece="the-headland"] img { object-position: center 7%; }
+  .eb-book.single .eb-plate figcaption, .eb-book.single header.eb-folio { display: none; }
+  .eb-book.single .eb-poem-page { flex: 1 0 auto; min-height: 0; padding: 0 8% 4%; }
+  .eb-book.single .eb-verse-block { padding: 16px 0 10px; }
+  .eb-book.single .eb-verse-block h1 { font-size: clamp(32px, 8.8vw, 43px); margin-bottom: .32em; }
+  .eb-book.single .eb-verse { font-size: calc(clamp(20px, 5vw, 23px) * var(--read-scale,1)); line-height: 1.31; }
+  .eb-book.single .eb-credit { margin-top: .75em; font-size: 14px; }
+  .eb-book.single .eb-tailpiece { width: 39%; aspect-ratio: 1.6; margin: 0 0 2%; align-self: flex-end; }
+  .eb-book.single .eb-fin { gap: 12px; margin-bottom: 0; }
+  .eb-book.single .eb-fin > * { font-size: 15px; }
+  .eb-book.single footer.eb-folio { padding-top: 6px; }
+}
+@media (max-width: 899px) and (max-height: 640px) and (orientation: portrait) {
+  .eb-book.single { --pw: min(calc(100vw - 36px), calc((100dvh - 124px) * .72)); max-height: calc(100dvh - 124px); }
+  .eb-book.single .eb-plate { flex-basis: 32%; }
+  .eb-book.single .eb-tailpiece { width: 33%; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .eb-book.single { --pw: min(590px, calc(100vw - 145px)); height: calc(100dvh - 90px); max-height: none; }
+  .eb-book.single .eb-sheet { display: grid; grid-template-columns: 43% 57%; }
+  .eb-book.single .eb-plate { padding: 0; min-height: 0; }
+  .eb-book.single .eb-plate img { inset: 4%; width: 92%; height: 92%; }
+  .eb-book.single .eb-poem-page { padding: 4% 9%; }
+  .eb-book.single .eb-verse-block { padding: 6px 0; }
+  .eb-book.single .eb-tailpiece { width: 36%; }
+  .eb-book.single .eb-jacket-type { inset: 10% auto auto 9%; width: 45%; }
+  .eb-book.single .eb-jacket { background: var(--eb-cloth); }
+  .eb-book.single .eb-binding { inset: 0 0 0 auto; width: 49%; object-fit: fill; }
+  .eb-book.single .eb-jacket-type h1 { font-size: calc(var(--pw) * .11); }
+  .eb-book.single .eb-open { right: 49%; }
+}
+@media (prefers-reduced-motion: reduce) { .eb-open span { transition: none; } }

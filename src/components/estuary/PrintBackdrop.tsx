@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { animate, motion, useMotionValue, useTransform, useVelocity } from "framer-motion";
+import { motion, useSpring, useTransform, useVelocity, type MotionValue } from "framer-motion";
 import type { ReaderScenery } from "../../data/publications";
 
 // The two prints are aligned. The new water fills the channels first, then
@@ -12,27 +11,19 @@ function floodMask(level: number) {
 
 const floodOpacity = (level: number) => Math.sqrt(level);
 
-export default function PrintBackdrop({ scenery, index, reduced }: {
+export default function PrintBackdrop({ scenery, index, reduced, tide: target }: {
   scenery: ReaderScenery;
   index: number;
+  tide: MotionValue<number>;
   reduced: boolean;
 }) {
   const level = scenery.tideLevels[Math.min(index, scenery.tideLevels.length - 1)] ?? 0;
-  const tide = useMotionValue(level);
+  const tide = useSpring(target, { stiffness: 84, damping: 21, restDelta: .0005 });
   const velocity = useVelocity(tide);
   const maskImage = useTransform(tide, floodMask);
   const opacity = useTransform(tide, floodOpacity);
   const reflectionOpacity = useTransform(velocity, speed => Math.min(.3, Math.abs(speed) * .24));
   const reflectionOffset = useTransform(tide, amount => Math.sin(amount * Math.PI * 7) * 3.5);
-
-  useEffect(() => {
-    if (reduced || Math.abs(level - tide.get()) < .001) {
-      tide.jump(level);
-      return;
-    }
-    const incoming = animate(tide, level, { duration: 1.65, ease: [.23, .3, .28, 1] });
-    return () => incoming.stop();
-  }, [level, reduced, tide]);
 
   return (
     <div className="dreamscape sr-print-backdrop" aria-hidden="true" data-tide={level}>
